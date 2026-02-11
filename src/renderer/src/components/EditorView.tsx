@@ -93,6 +93,12 @@ export const EditorView: React.FC<EditorViewProps> = ({
         setShowFindReplace(true)
       }
 
+      // Cmd/Ctrl + B: Toggle Sidebar
+      if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
+        e.preventDefault()
+        setShowRightSidebar((prev) => !prev)
+      }
+
       // Escape: Close Find & Replace
       if (e.key === 'Escape' && showFindReplace) {
         setShowFindReplace(false)
@@ -439,9 +445,8 @@ export const EditorView: React.FC<EditorViewProps> = ({
 
           <button
             onClick={() => setSpellCheck(!spellCheck)}
-            className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all ${
-              spellCheck ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'
-            }`}
+            className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all ${spellCheck ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'
+              }`}
             title="Spell Check"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -458,11 +463,10 @@ export const EditorView: React.FC<EditorViewProps> = ({
 
           <button
             onClick={() => setShowRightSidebar(!showRightSidebar)}
-            className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all ${
-              showRightSidebar
+            className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all ${showRightSidebar
                 ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
                 : 'text-gray-600 dark:text-gray-400'
-            }`}
+              }`}
             title="Toggle Sidebar (Ctrl+B)"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

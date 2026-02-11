@@ -168,7 +168,144 @@ ${html}
 }
 
 function exportAsPrint() {
-  window.print()
+  // Get the rendered HTML from the preview
+  const previewContent = preview.innerHTML
+  
+  // Create a new window with just the preview content
+  const printWindow = window.open('', '_blank', 'width=800,height=600')
+  
+  printWindow.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Print Preview - MarkScribe</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+    }
+    
+    h1 { font-size: 2em; border-bottom: 2px solid #eee; padding-bottom: 0.3em; }
+    h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+    h3 { font-size: 1.25em; }
+    
+    code {
+      background: #f6f8fa;
+      padding: 0.2em 0.4em;
+      border-radius: 3px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.9em;
+    }
+    
+    pre {
+      background: #f6f8fa;
+      padding: 1em;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    blockquote {
+      border-left: 4px solid #ddd;
+      padding-left: 1em;
+      margin-left: 0;
+      color: #666;
+    }
+    
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+    }
+    
+    table th,
+    table td {
+      border: 1px solid #ddd;
+      padding: 0.5em;
+      text-align: left;
+    }
+    
+    table th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    
+    a {
+      color: #0366d6;
+      text-decoration: none;
+    }
+    
+    a:hover {
+      text-decoration: underline;
+    }
+    
+    @media print {
+      body {
+        padding: 0;
+      }
+      
+      @page {
+        margin: 0.5in;
+      }
+      
+      .print-tip {
+        display: none !important;
+      }
+    }
+    
+    @page {
+      size: auto;
+      margin: 0.5in;
+    }
+  </style>
+</head>
+<body>
+<div class="print-tip" style="background: #fff3cd; border: 1px solid #ffc107; padding: 1rem; margin-bottom: 2rem; border-radius: 6px; page-break-inside: avoid;">
+  <strong>📄 Print Tip:</strong> For a cleaner PDF without headers/footers:
+  <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+    <li><strong>Chrome/Edge:</strong> In print dialog, toggle off "Headers and footers"</li>
+    <li><strong>Safari:</strong> Uncheck "Print headers and footers" in print dialog</li>
+    <li><strong>Firefox:</strong> In print settings, set Headers & Footers to "Blank"</li>
+  </ul>
+  <small style="color: #856404; display: block; margin-top: 0.5rem;">This message will not appear in the printed document.</small>
+</div>
+${previewContent}
+</body>
+</html>
+  `)
+  
+  printWindow.document.close()
+  
+  // Wait for content to load, then trigger print dialog
+  printWindow.onload = function() {
+    printWindow.focus()
+    printWindow.print()
+    // Close the window after printing (user can cancel)
+    printWindow.onafterprint = function() {
+      printWindow.close()
+    }
+  }
+  
   closeExportModal()
 }
 

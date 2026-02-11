@@ -21,14 +21,6 @@
 
 ## 🚀 Installation
 
-### Download
-
-Download the latest release for your platform:
-- [macOS (Apple Silicon)](https://github.com/sneh-joshi/markscribe/releases)
-- [macOS (Intel)](https://github.com/sneh-joshi/markscribe/releases)
-- [Windows](https://github.com/sneh-joshi/markscribe/releases)
-- [Linux](https://github.com/sneh-joshi/markscribe/releases)
-
 ### Build from Source
 
 ```bash

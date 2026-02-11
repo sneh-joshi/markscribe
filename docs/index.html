@@ -1,222 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="MarkScribe - A modern, feature-rich Markdown editor built with Electron, React, and TypeScript"
-    />
-    <title>MarkScribe - Modern Markdown Editor</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <!-- Hero Section -->
-    <header class="hero">
-      <div class="container">
-        <div class="hero-content">
-          <h1 class="hero-title">
-            <span class="gradient-text">MarkScribe</span>
-          </h1>
-          <p class="hero-subtitle">
-            A modern, feature-rich Markdown editor for macOS, Windows, and Linux
-          </p>
-          <div class="hero-buttons">
-            <a href="https://github.com/yourusername/markscribe/releases" class="btn btn-primary">
-              <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                />
-              </svg>
-              Download Now
-            </a>
-            <a href="https://github.com/yourusername/markscribe" class="btn btn-secondary">
-              <svg class="btn-icon" fill="currentColor" viewBox="0 0 24 24">
-                <path
-                  d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
-                />
-              </svg>
-              View on GitHub
-            </a>
-          </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="MarkScribe - A modern, feature-rich Markdown editor built with Electron, React, and TypeScript" />
+  <title>MarkScribe - Modern Markdown Editor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="gradient-text">MarkScribe</span>
+        </h1>
+        <p class="hero-subtitle">
+          A modern, feature-rich Markdown editor for macOS, Windows, and Linux
+        </p>
+        <div class="hero-buttons">
+          <a href="demo/" class="btn btn-primary">
+            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Try Demo
+          </a>
+          <a href="https://github.com/sneh-joshi/markscribe/releases" class="btn btn-secondary">
+            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download Now
+          </a>
+          <a href="https://github.com/sneh-joshi/markscribe" class="btn btn-secondary">
+            <svg class="btn-icon" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+            </svg>
+            View on GitHub
+          </a>
         </div>
-        <div class="hero-image">
-          <div class="app-window">
-            <div class="window-header">
-              <div class="window-buttons">
-                <span class="window-btn red"></span>
-                <span class="window-btn yellow"></span>
-                <span class="window-btn green"></span>
+      </div>
+      <div class="hero-image">
+        <div class="app-window">
+          <div class="window-header">
+            <div class="window-buttons">
+              <span class="window-btn red"></span>
+              <span class="window-btn yellow"></span>
+              <span class="window-btn green"></span>
+            </div>
+            <div class="window-title">MarkScribe</div>
+          </div>
+          <div class="window-content">
+            <div class="editor-mockup">
+              <div class="editor-sidebar">
+                <div class="sidebar-item active">📝 Document.md</div>
+                <div class="sidebar-item">📊 Stats</div>
+                <div class="sidebar-item">🕐 History</div>
               </div>
-              <div class="window-title">MarkScribe</div>
-            </div>
-            <div class="window-content">
-              <div class="editor-mockup">
-                <div class="editor-sidebar">
-                  <div class="sidebar-item active">📝 Document.md</div>
-                  <div class="sidebar-item">📊 Stats</div>
-                  <div class="sidebar-item">🕐 History</div>
+              <div class="editor-main">
+                <div class="editor-line"># Welcome to MarkScribe</div>
+                <div class="editor-line"></div>
+                <div class="editor-line">
+                  A **modern** markdown editor with *live preview*
                 </div>
-                <div class="editor-main">
-                  <div class="editor-line"># Welcome to MarkScribe</div>
-                  <div class="editor-line"></div>
-                  <div class="editor-line">
-                    A **modern** markdown editor with *live preview*
-                  </div>
-                  <div class="editor-line"></div>
-                  <div class="editor-line">- Feature 1</div>
-                  <div class="editor-line">- Feature 2</div>
-                </div>
+                <div class="editor-line"></div>
+                <div class="editor-line">- Feature 1</div>
+                <div class="editor-line">- Feature 2</div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <!-- Features Section -->
-    <section class="features">
-      <div class="container">
-        <h2 class="section-title">Powerful Features</h2>
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">📝</div>
-            <h3>Live Preview</h3>
-            <p>Real-time markdown rendering with syntax highlighting</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🎨</div>
-            <h3>Multiple Views</h3>
-            <p>Edit, Split, or Preview-only modes</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🌙</div>
-            <h3>Dark Mode</h3>
-            <p>Beautiful dark theme with system sync</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">💾</div>
-            <h3>Auto-Save</h3>
-            <p>Never lose your work with automatic saving</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">📤</div>
-            <h3>Export Options</h3>
-            <p>Export to PDF, HTML, or DOCX</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🕐</div>
-            <h3>Version History</h3>
-            <p>Track changes with automatic snapshots</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🔄</div>
-            <h3>Diff Viewer</h3>
-            <p>Compare versions side-by-side</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">⚡</div>
-            <h3>Fast & Lightweight</h3>
-            <p>Built with performance in mind</p>
-          </div>
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">Powerful Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📝</div>
+          <h3>Live Preview</h3>
+          <p>Real-time markdown rendering with syntax highlighting</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Multiple Views</h3>
+          <p>Edit, Split, or Preview-only modes</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌙</div>
+          <h3>Dark Mode</h3>
+          <p>Beautiful dark theme with system sync</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💾</div>
+          <h3>Auto-Save</h3>
+          <p>Never lose your work with automatic saving</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📤</div>
+          <h3>Export Options</h3>
+          <p>Export to PDF, HTML, or DOCX</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🕐</div>
+          <h3>Version History</h3>
+          <p>Track changes with automatic snapshots</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h3>Diff Viewer</h3>
+          <p>Compare versions side-by-side</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Fast & Lightweight</h3>
+          <p>Built with performance in mind</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Download Section -->
-    <section class="download">
-      <div class="container">
-        <h2 class="section-title">Download for Your Platform</h2>
-        <div class="download-grid">
-          <a href="https://github.com/yourusername/markscribe/releases" class="download-card">
-            <div class="download-icon">
-              <svg fill="currentColor" viewBox="0 0 24 24">
-                <path
-                  d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
-                />
-              </svg>
-            </div>
-            <h3>macOS</h3>
-            <p>Apple Silicon & Intel</p>
-          </a>
-          <a href="https://github.com/yourusername/markscribe/releases" class="download-card">
-            <div class="download-icon">
-              <svg fill="currentColor" viewBox="0 0 24 24">
-                <path
-                  d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"
-                />
-              </svg>
-            </div>
-            <h3>Windows</h3>
-            <p>Windows 10/11</p>
-          </a>
-          <a href="https://github.com/yourusername/markscribe/releases" class="download-card">
-            <div class="download-icon">
-              <svg fill="currentColor" viewBox="0 0 24 24">
-                <path
-                  d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.84-.41 1.684-.287 2.489.123.805.487 1.52 1.03 2.103.542.584 1.236 1.041 2.02 1.315.784.275 1.64.365 2.498.315 1.715-.1 3.434-.673 4.768-1.679 1.334-1.006 2.283-2.443 2.611-4.035.164-.796.246-1.613.246-2.429 0-1.635-.328-3.27-.984-4.905-.656-1.635-1.648-3.27-2.968-4.905C13.254.673 12.504 0 12.504 0zm2.283 15.464c-.587.587-1.312.88-2.175.88-.863 0-1.588-.293-2.175-.88-.587-.587-.88-1.312-.88-2.175 0-.863.293-1.588.88-2.175.587-.587 1.312-.88 2.175-.88.863 0 1.588.293 2.175.88.587.587.88 1.312.88 2.175 0 .863-.293 1.588-.88 2.175z"
-                />
-              </svg>
-            </div>
-            <h3>Linux</h3>
-            <p>AppImage, deb, rpm</p>
-          </a>
+  <!-- Download Section -->
+  <section class="download">
+    <div class="container">
+      <h2 class="section-title">Download for Your Platform</h2>
+      <div class="download-grid">
+        <a href="https://github.com/sneh-joshi/markscribe/releases" class="download-card">
+          <div class="download-icon">
+            <svg fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+            </svg>
+          </div>
+          <h3>macOS</h3>
+          <p>Apple Silicon & Intel</p>
+        </a>
+        <a href="https://github.com/sneh-joshi/markscribe/releases" class="download-card">
+          <div class="download-icon">
+            <svg fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
+            </svg>
+          </div>
+          <h3>Windows</h3>
+          <p>Windows 10/11</p>
+        </a>
+        <a href="https://github.com/sneh-joshi/markscribe/releases" class="download-card">
+          <div class="download-icon">
+            <svg fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.84-.41 1.684-.287 2.489.123.805.487 1.52 1.03 2.103.542.584 1.236 1.041 2.02 1.315.784.275 1.64.365 2.498.315 1.715-.1 3.434-.673 4.768-1.679 1.334-1.006 2.283-2.443 2.611-4.035.164-.796.246-1.613.246-2.429 0-1.635-.328-3.27-.984-4.905-.656-1.635-1.648-3.27-2.968-4.905C13.254.673 12.504 0 12.504 0zm2.283 15.464c-.587.587-1.312.88-2.175.88-.863 0-1.588-.293-2.175-.88-.587-.587-.88-1.312-.88-2.175 0-.863.293-1.588.88-2.175.587-.587 1.312-.88 2.175-.88.863 0 1.588.293 2.175.88.587.587.88 1.312.88 2.175 0 .863-.293 1.588-.88 2.175z" />
+            </svg>
+          </div>
+          <h3>Linux</h3>
+          <p>AppImage, deb, rpm</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack Section -->
+  <section class="tech-stack">
+    <div class="container">
+      <h2 class="section-title">Built With Modern Technology</h2>
+      <div class="tech-grid">
+        <div class="tech-item">Electron</div>
+        <div class="tech-item">React 19</div>
+        <div class="tech-item">TypeScript</div>
+        <div class="tech-item">Tailwind CSS</div>
+        <div class="tech-item">IndexedDB</div>
+        <div class="tech-item">MDEditor</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>MarkScribe</h3>
+          <p>A modern markdown editor for everyone</p>
+        </div>
+        <div class="footer-section">
+          <h4>Links</h4>
+          <ul>
+            <li>
+              <a href="https://github.com/sneh-joshi/markscribe">GitHub</a>
+            </li>
+            <li>
+              <a href="https://github.com/sneh-joshi/markscribe/releases">Releases</a>
+            </li>
+            <li>
+              <a href="https://github.com/sneh-joshi/markscribe/issues">Issues</a>
+            </li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>License</h4>
+          <p>MIT License</p>
+          <p>Open Source & Free</p>
         </div>
       </div>
-    </section>
-
-    <!-- Tech Stack Section -->
-    <section class="tech-stack">
-      <div class="container">
-        <h2 class="section-title">Built With Modern Technology</h2>
-        <div class="tech-grid">
-          <div class="tech-item">Electron</div>
-          <div class="tech-item">React 19</div>
-          <div class="tech-item">TypeScript</div>
-          <div class="tech-item">Tailwind CSS</div>
-          <div class="tech-item">IndexedDB</div>
-          <div class="tech-item">MDEditor</div>
-        </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 MarkScribe. Built with ❤️ using Electron & React</p>
       </div>
-    </section>
+    </div>
+  </footer>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="container">
-        <div class="footer-content">
-          <div class="footer-section">
-            <h3>MarkScribe</h3>
-            <p>A modern markdown editor for everyone</p>
-          </div>
-          <div class="footer-section">
-            <h4>Links</h4>
-            <ul>
-              <li>
-                <a href="https://github.com/yourusername/markscribe">GitHub</a>
-              </li>
-              <li>
-                <a href="https://github.com/yourusername/markscribe/releases">Releases</a>
-              </li>
-              <li>
-                <a href="https://github.com/yourusername/markscribe/issues">Issues</a>
-              </li>
-            </ul>
-          </div>
-          <div class="footer-section">
-            <h4>License</h4>
-            <p>MIT License</p>
-            <p>Open Source & Free</p>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          <p>&copy; 2026 MarkScribe. Built with ❤️ using Electron & React</p>
-        </div>
-      </div>
-    </footer>
+  <script src="script.js"></script>
+</body>
 
-    <script src="script.js"></script>
-  </body>
 </html>

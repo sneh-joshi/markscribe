@@ -2,9 +2,9 @@
 
 > A modern, feature-rich Markdown editor built with Electron, React, and TypeScript
 
-🌐 **[Live Demo & Product Page](https://yourusername.github.io/markscribe/)**
+🌐 **[Live Demo & Product Page](https://sneh-joshi.github.io/markscribe/)** | 🚀 **[Try Web Demo](https://sneh-joshi.github.io/markscribe/demo/)**
 
-![MarkScribe](https://via.placeholder.com/800x450/3B82F6/FFFFFF?text=MarkScribe+Screenshot)
+
 
 ## ✨ Features
 
@@ -24,16 +24,16 @@
 ### Download
 
 Download the latest release for your platform:
-- [macOS (Apple Silicon)](https://github.com/yourusername/markscribe/releases)
-- [macOS (Intel)](https://github.com/yourusername/markscribe/releases)
-- [Windows](https://github.com/yourusername/markscribe/releases)
-- [Linux](https://github.com/yourusername/markscribe/releases)
+- [macOS (Apple Silicon)](https://github.com/sneh-joshi/markscribe/releases)
+- [macOS (Intel)](https://github.com/sneh-joshi/markscribe/releases)
+- [Windows](https://github.com/sneh-joshi/markscribe/releases)
+- [Linux](https://github.com/sneh-joshi/markscribe/releases)
 
 ### Build from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/markscribe.git
+git clone https://github.com/sneh-joshi/markscribe.git
 cd markscribe
 
 # Install dependencies
@@ -75,14 +75,14 @@ npm run build:linux  # Linux
 
 ## 📸 Screenshots
 
-### Light Mode
-![Light Mode](https://via.placeholder.com/800x450/FFFFFF/3B82F6?text=Light+Mode)
-
 ### Dark Mode
-![Dark Mode](https://via.placeholder.com/800x450/1F2937/3B82F6?text=Dark+Mode)
+![MarkScribe Dark Mode](docs/images/dark-mode.png)
 
-### Diff Viewer
-![Diff Viewer](https://via.placeholder.com/800x450/3B82F6/FFFFFF?text=Diff+Viewer)
+### Light Mode
+![MarkScribe Light Mode](docs/images/light-mode.png)
+
+### Version History & Diff Viewer
+![MarkScribe Diff Viewer](docs/images/diff-viewer.png)
 
 ## 🤝 Contributing
 

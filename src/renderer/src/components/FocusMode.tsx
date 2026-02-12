@@ -7,7 +7,7 @@ interface FocusModeProps {
   theme: 'light' | 'dark' | 'system'
 }
 
-export const FocusMode: React.FC<FocusModeProps> = ({ content, onChange, onExit, theme }) => {
+export const FocusMode: React.FC<FocusModeProps> = ({ content, onChange, onExit }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [wordCount, setWordCount] = useState(0)
   const [charCount, setCharCount] = useState(0)

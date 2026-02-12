@@ -8,7 +8,12 @@ import { FindReplace } from './FindReplace'
 import { ExportDropdown } from './ExportDropdown'
 import { RightSidebar } from './RightSidebar'
 import { DiffViewer } from './DiffViewer'
+import { AISettings } from './AISettings'
 import { createSnapshot, getSnapshots, deleteSnapshot, Snapshot } from '../lib/versionHistory'
+import { loadAIConfig } from '../lib/ai/config'
+import { aiProviderManager } from '../lib/ai/provider-manager'
+import { useAIAutoComplete } from './AIAutoComplete'
+import { AICommandPalette } from './AICommandPalette'
 
 interface EditorViewProps {
   content: string
@@ -39,10 +44,59 @@ export const EditorView: React.FC<EditorViewProps> = ({
   const [showFindReplace, setShowFindReplace] = useState(false)
   const [spellCheck, setSpellCheck] = useState(true)
   const [showRightSidebar, setShowRightSidebar] = useState(true)
+  const [showAISettings, setShowAISettings] = useState(false)
+  const [showAICommandPalette, setShowAICommandPalette] = useState(false)
+  const [aiEnabled, setAiEnabled] = useState(false)
+  const [aiSuggestionRefreshToken] = useState(0)
+  const [cursorPosition, setCursorPosition] = useState(0)
+  const [selectionRange, setSelectionRange] = useState<{ start: number; end: number }>({
+    start: 0,
+    end: 0
+  })
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
   const [compareSnapshot, setCompareSnapshot] = useState<Snapshot | null>(null)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const lastSavedContentRef = useRef(content)
+
+  // Initialize AI provider from saved config.
+  useEffect(() => {
+    const saved = loadAIConfig()
+    if (saved?.enabled) {
+      setAiEnabled(true)
+      try {
+        aiProviderManager.setProvider(saved)
+      } catch (error) {
+        console.error('Failed to initialize AI provider:', error)
+      }
+    } else {
+      setAiEnabled(false)
+      aiProviderManager.clear()
+    }
+  }, [])
+
+  const handleCloseAISettings = (): void => {
+    setShowAISettings(false)
+
+    const saved = loadAIConfig()
+    if (saved?.enabled) {
+      setAiEnabled(true)
+      try {
+        aiProviderManager.setProvider(saved)
+      } catch (error) {
+        console.error('Failed to initialize AI provider:', error)
+      }
+    } else {
+      setAiEnabled(false)
+      aiProviderManager.clear()
+    }
+  }
+
+  const { suggestion, clearSuggestion, consumeSuggestionPrefix } = useAIAutoComplete({
+    content,
+    cursorPosition,
+    enabled: aiEnabled,
+    refreshToken: aiSuggestionRefreshToken
+  })
 
   // Auto-save logic
   useEffect(() => {
@@ -99,15 +153,63 @@ export const EditorView: React.FC<EditorViewProps> = ({
         setShowRightSidebar((prev) => !prev)
       }
 
+      // Cmd/Ctrl + Shift + A: AI Command Palette
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault()
+        setShowAICommandPalette(true)
+      }
+
       // Escape: Close Find & Replace
       if (e.key === 'Escape' && showFindReplace) {
         setShowFindReplace(false)
+      }
+
+      // Escape: Close AI palette
+      if (e.key === 'Escape' && showAICommandPalette) {
+        setShowAICommandPalette(false)
+      }
+
+      // Escape: dismiss inline suggestion only
+      if (e.key === 'Escape' && aiEnabled) {
+        clearSuggestion()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onSave, content, showFindReplace])
+  }, [
+    onSave,
+    content,
+    showFindReplace,
+    showAICommandPalette,
+    aiEnabled,
+    clearSuggestion
+  ])
+
+  const selectedText = React.useMemo(() => {
+    const start = Math.min(selectionRange.start, selectionRange.end)
+    const end = Math.max(selectionRange.start, selectionRange.end)
+    if (start === end) return ''
+    return content.slice(start, end)
+  }, [content, selectionRange.end, selectionRange.start])
+
+  const aiTargetText = selectedText.trim().length > 0 ? selectedText : content
+  const applyLabel = selectedText.trim().length > 0 ? 'Replace Selection' : 'Replace Document'
+
+  const applyAIReplacement = (replacement: string): void => {
+    if (selectedText.trim().length > 0) {
+      const start = Math.min(selectionRange.start, selectionRange.end)
+      const end = Math.max(selectionRange.start, selectionRange.end)
+      onChange(content.slice(0, start) + replacement + content.slice(end))
+      setSelectionRange({ start: start + replacement.length, end: start + replacement.length })
+      setCursorPosition(start + replacement.length)
+      return
+    }
+
+    onChange(replacement)
+    setSelectionRange({ start: 0, end: 0 })
+    setCursorPosition(0)
+  }
 
   // Load snapshots on mount and when file changes
   useEffect(() => {
@@ -421,6 +523,22 @@ export const EditorView: React.FC<EditorViewProps> = ({
 
         <div className="flex items-center gap-2">
           <button
+            onClick={() => setShowAICommandPalette(true)}
+            className="px-3 py-1.5 text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800 rounded-md transition-all"
+            title="Open AI Editor (Cmd+Shift+A)"
+          >
+            ✨ AI Editor
+          </button>
+
+          <button
+            onClick={() => setShowAISettings(true)}
+            className="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-700 rounded-md transition-all"
+            title="Open AI Assistant Settings"
+          >
+            ⚙️ AI Settings
+          </button>
+
+          <button
             onClick={() => setFocusMode(true)}
             className="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-700 rounded-md transition-all"
             title="Enter Focus Mode (distraction-free writing)"
@@ -464,8 +582,8 @@ export const EditorView: React.FC<EditorViewProps> = ({
           <button
             onClick={() => setShowRightSidebar(!showRightSidebar)}
             className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all ${showRightSidebar
-                ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
-                : 'text-gray-600 dark:text-gray-400'
+              ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
+              : 'text-gray-600 dark:text-gray-400'
               }`}
             title="Toggle Sidebar (Ctrl+B)"
           >
@@ -515,8 +633,14 @@ export const EditorView: React.FC<EditorViewProps> = ({
                   onChange={onChange}
                   theme={theme}
                   spellCheck={spellCheck}
+                  onCursorPositionChange={setCursorPosition}
+                  onSelectionChange={(start, end) => setSelectionRange({ start, end })}
+                  aiSuggestion={aiEnabled ? suggestion : undefined}
+                  onSuggestionAccepted={clearSuggestion}
+                  onSuggestionPartiallyAccepted={consumeSuggestionPrefix}
                 />
               </div>
+
               <StatusBar content={content} saveStatus={saveStatus} />
             </div>
           )}
@@ -530,12 +654,18 @@ export const EditorView: React.FC<EditorViewProps> = ({
                     onChange={onChange}
                     theme={theme}
                     spellCheck={spellCheck}
+                    onCursorPositionChange={setCursorPosition}
+                    onSelectionChange={(start, end) => setSelectionRange({ start, end })}
+                    aiSuggestion={aiEnabled ? suggestion : undefined}
+                    onSuggestionAccepted={clearSuggestion}
+                    onSuggestionPartiallyAccepted={consumeSuggestionPrefix}
                   />
                 </div>
                 <div className="h-full overflow-hidden">
                   <Preview content={content} />
                 </div>
               </div>
+
               <StatusBar content={content} saveStatus={saveStatus} />
             </div>
           )}
@@ -560,10 +690,24 @@ export const EditorView: React.FC<EditorViewProps> = ({
               onToggleSpellCheck={setSpellCheck}
               theme={theme}
               onToggleTheme={onToggleTheme}
+              onOpenAIEditor={() => setShowAICommandPalette(true)}
+              onOpenAISettings={() => setShowAISettings(true)}
             />
           </div>
         )}
       </div>
+
+      {/* AI Command Palette */}
+      <AICommandPalette
+        isOpen={showAICommandPalette}
+        onClose={() => setShowAICommandPalette(false)}
+        targetText={aiTargetText}
+        applyLabel={applyLabel}
+        onApply={applyAIReplacement}
+      />
+
+      {/* AI Settings Modal */}
+      {showAISettings && <AISettings onClose={handleCloseAISettings} />}
 
       {/* Diff Viewer Modal */}
       {compareSnapshot && (

@@ -48,6 +48,10 @@
             </div>
         </div>
         <div class="header-right">
+            <button class="icon-btn" id="aiConnectBtn" title="Connect Ollama Endpoint">
+                <span style="font-size: 14px; line-height: 1;">🤖</span>
+            </button>
+            <span class="ai-status" id="aiStatusBadge">AI: Mock</span>
             <button class="icon-btn" id="darkModeToggle" title="Toggle Dark Mode">
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path
@@ -69,7 +73,8 @@
     <!-- Main Editor Area -->
     <main class="main-container">
         <div class="editor-pane" id="editorPane">
-            <textarea id="editor"># Welcome to MarkScribe Web Demo!
+            <div class="editor-shell">
+                <textarea id="editor"># Welcome to MarkScribe Web Demo!
 
 Try editing this text to see the **live preview** in action.
 
@@ -103,11 +108,44 @@ function hello() {
 ---
 
 **Tip:** Your work is automatically saved to your browser's local storage!</textarea>
+                <div id="editorGhost" class="editor-ghost" aria-hidden="true"></div>
+            </div>
         </div>
         <div class="preview-pane" id="previewPane">
             <div id="preview" class="markdown-body"></div>
         </div>
     </main>
+
+    <!-- AI Connect Modal -->
+    <div class="modal" id="aiModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Connect Ollama (Optional)</h2>
+                <button class="modal-close" id="closeAIModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="ollamaEndpoint">Endpoint URL</label>
+                    <input id="ollamaEndpoint" type="url" class="form-input" placeholder="http://127.0.0.1:11434"
+                        value="http://127.0.0.1:11434" />
+                </div>
+                <div class="form-group">
+                    <label for="ollamaModel">Model Name</label>
+                    <input id="ollamaModel" type="text" class="form-input" placeholder="llama3.2:latest"
+                        value="llama3.2:latest" />
+                </div>
+
+                <div class="ai-modal-actions">
+                    <button class="btn-secondary-inline" id="testAIConnection">Test Connection</button>
+                    <button class="btn-primary-inline" id="saveAISettings">Save</button>
+                </div>
+
+                <p class="helper-text" id="aiConnectionMessage">
+                    Tip: Browser demos may fail against local Ollama if CORS/origin is blocked. The desktop app uses IPC and is more reliable.
+                </p>
+            </div>
+        </div>
+    </div>
 
     <!-- Export Modal -->
     <div class="modal" id="exportModal">

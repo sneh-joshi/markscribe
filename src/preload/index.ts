@@ -18,7 +18,12 @@ const api = {
   exportToHTML: (content: string): Promise<string | null> =>
     ipcRenderer.invoke('export-html', content),
   exportToDOCX: (content: string): Promise<string | null> =>
-    ipcRenderer.invoke('export-docx', content)
+    ipcRenderer.invoke('export-docx', content),
+
+  // AI (Ollama) via IPC to avoid renderer CORS issues in production (file:// origin)
+  ollamaTags: (endpoint: string): Promise<any> => ipcRenderer.invoke('ollama-tags', endpoint),
+  ollamaGenerate: (endpoint: string, payload: any): Promise<any> =>
+    ipcRenderer.invoke('ollama-generate', endpoint, payload)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

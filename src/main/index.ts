@@ -184,6 +184,105 @@ app.whenReady().then(() => {
     // Ping received
   })
 
+  const normalizeHttpEndpoint = (endpoint: string): string => {
+    let url: URL
+    try {
+      url = new URL(endpoint)
+    } catch {
+      throw new Error('Invalid endpoint URL')
+    }
+
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      throw new Error('Endpoint must start with http:// or https://')
+    }
+
+    if (url.username || url.password) {
+      throw new Error('Endpoint must not include URL credentials')
+    }
+
+    const hostname = url.hostname.toLowerCase()
+    const isLoopback =
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '::1' ||
+      hostname === '[::1]'
+
+    if (!isLoopback) {
+      throw new Error('Only local Ollama endpoints are allowed (localhost/127.0.0.1/::1)')
+    }
+
+    // Endpoint should be a bare base URL only.
+    if (url.pathname && url.pathname !== '/') {
+      throw new Error('Endpoint must not include a path')
+    }
+
+    // Lock to the standard Ollama port to avoid proxying arbitrary local services.
+    if (url.port && url.port !== '11434') {
+      throw new Error('Only Ollama default port 11434 is allowed')
+    }
+
+    // Drop trailing slash for consistent joining.
+    const normalizedHost = hostname.includes(':') ? `[${hostname}]` : hostname
+    return `${url.protocol}//${normalizedHost}:11434`
+  }
+
+  ipcMain.handle('ollama-tags', async (_, endpoint: string) => {
+    const base = normalizeHttpEndpoint(endpoint)
+    const response = await fetch(`${base}/api/tags`)
+    if (!response.ok) {
+      throw new Error(`Ollama API error: ${response.status} ${response.statusText}`)
+    }
+    return await response.json()
+  })
+
+  ipcMain.handle('ollama-generate', async (_, endpoint: string, payload: any) => {
+    const base = normalizeHttpEndpoint(endpoint)
+    const response = await fetch(`${base}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+
+    if (!response.ok) {
+      throw new Error(`Ollama API error: ${response.status} ${response.statusText}`)
+    }
+
+    // Ollama streams NDJSON lines when stream=true.
+    if (payload?.stream) {
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('Response body is not readable')
+      }
+
+      const decoder = new TextDecoder()
+      let aggregated = ''
+      let model = payload?.model
+      let created_at: string | undefined
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('\n').filter(Boolean)
+        for (const line of lines) {
+          try {
+            const json = JSON.parse(line)
+            if (typeof json.response === 'string') aggregated += json.response
+            if (json.model) model = json.model
+            if (json.created_at) created_at = json.created_at
+          } catch {
+            // ignore partial/invalid lines
+          }
+        }
+      }
+
+      return { model, created_at, response: aggregated, done: true }
+    }
+
+    return await response.json()
+  })
+
   ipcMain.handle('open-file', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: ['openFile'],

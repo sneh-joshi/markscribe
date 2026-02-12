@@ -9,6 +9,9 @@
 ## ✨ Features
 
 - **📝 Live Preview** - Real-time markdown rendering with syntax highlighting
+- **🤖 AI Writing Assistant** - Inline ghost suggestions while you type
+- **✨ AI Editor Commands** - Improve, summarize, expand, and grammar fixes
+- **🧠 AI Providers** - Configure Ollama (local) or OpenAI in app settings
 - **🎨 Multiple View Modes** - Edit, Split, or Preview-only modes
 - **🌙 Dark Mode** - Beautiful dark theme with system sync
 - **💾 Auto-Save** - Never lose your work
@@ -48,11 +51,36 @@ npm run build:linux  # Linux
 4. **Export** - Export your document to PDF, HTML, or DOCX
 5. **Version Control** - View history and compare changes with the diff viewer
 
+### AI Features
+
+- Open **AI Editor** from the top bar or with `Cmd/Ctrl + Shift + A`
+- Use inline suggestions directly in the editor
+- Accept full suggestion with `Tab`
+- Accept next word with `Cmd/Ctrl + →`
+- Dismiss suggestion with `Esc`
+
+### AI Setup (Desktop App)
+
+1. Open **AI Settings**
+2. Choose provider: **Ollama** (local) or **OpenAI**
+3. For Ollama, ensure the endpoint is running (default `http://127.0.0.1:11434`)
+4. Select a model and save configuration
+5. Return to editor and start typing to trigger inline suggestions
+
+### AI in Web Demo
+
+- The web demo includes an optional **Connect Ollama** setting
+- If browser CORS/origin blocks local Ollama, demo suggestions fall back to mock responses
+- Desktop app AI is more reliable for Ollama because requests are routed via Electron IPC
+
 ### Keyboard Shortcuts
 
 - `Cmd/Ctrl + S` - Save document
 - `Cmd/Ctrl + F` - Find & Replace
 - `Cmd/Ctrl + B` - Toggle sidebar
+- `Cmd/Ctrl + Shift + A` - Open AI Editor
+- `Tab` - Accept inline AI suggestion
+- `Cmd/Ctrl + →` - Accept next word of inline suggestion
 - `ESC` - Close modals
 
 ## 🛠️ Tech Stack

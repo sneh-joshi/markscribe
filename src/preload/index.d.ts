@@ -12,6 +12,10 @@ declare global {
       loadFileByPath: (filePath: string) => Promise<{ filePath: string; content: string } | null>
       exportToHTML: (content: string) => Promise<string | null>
       exportToDOCX: (content: string) => Promise<string | null>
+
+      // AI (Ollama)
+      ollamaTags: (endpoint: string) => Promise<any>
+      ollamaGenerate: (endpoint: string, payload: any) => Promise<any>
     }
   }
 }

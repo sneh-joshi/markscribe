@@ -16,11 +16,21 @@ marked.setOptions({
 
 // DOM Elements
 const editor = document.getElementById('editor')
+const editorGhost = document.getElementById('editorGhost')
 const preview = document.getElementById('preview')
 const darkModeToggle = document.getElementById('darkModeToggle')
 const exportBtn = document.getElementById('exportBtn')
 const exportModal = document.getElementById('exportModal')
 const closeModal = document.getElementById('closeModal')
+const aiConnectBtn = document.getElementById('aiConnectBtn')
+const aiStatusBadge = document.getElementById('aiStatusBadge')
+const aiModal = document.getElementById('aiModal')
+const closeAIModal = document.getElementById('closeAIModal')
+const ollamaEndpointInput = document.getElementById('ollamaEndpoint')
+const ollamaModelInput = document.getElementById('ollamaModel')
+const testAIConnectionBtn = document.getElementById('testAIConnection')
+const saveAISettingsBtn = document.getElementById('saveAISettings')
+const aiConnectionMessage = document.getElementById('aiConnectionMessage')
 const viewBtns = document.querySelectorAll('.view-btn')
 const wordCount = document.getElementById('wordCount')
 const charCount = document.getElementById('charCount')
@@ -30,6 +40,356 @@ const saveStatus = document.getElementById('saveStatus')
 // State
 let currentViewMode = 'split'
 let saveTimeout = null
+let suggestionTimeout = null
+let aiSuggestion = ''
+let activeSuggestionRequestId = 0
+let aiConfig = {
+  enabled: false,
+  endpoint: 'http://127.0.0.1:11434',
+  model: 'llama3.2:latest'
+}
+
+const SUGGESTION_DEBOUNCE_MS = 900
+const MAX_SUGGESTION_CHARS = 120
+
+function normalizeText(value) {
+  return (value || '').replace(/\s+/g, ' ').trim().toLowerCase()
+}
+
+function getMockSuggestion(before, after) {
+  const trimmedBefore = before.trimEnd()
+  const lastLine = trimmedBefore.split('\n').pop()?.trim() || ''
+
+  if (lastLine.startsWith('### ')) return 'This section explains the practical impact and trade-offs in simple terms.'
+  if (lastLine.startsWith('- ')) return 'Add measurable outcomes so the point is easier to evaluate.'
+  if (lastLine.startsWith('> ')) return 'This perspective is useful, but should be validated with real examples.'
+  if (after.trimStart().startsWith('- ')) return '- Include one concrete data point to support this claim.'
+
+  return 'This improves clarity and keeps the narrative focused on actionable outcomes.'
+}
+
+function sanitizeSuggestion(raw) {
+  const firstLine = (raw || '').replace(/\r\n/g, '\n').split('\n')[0]?.trim() || ''
+  if (!firstLine) return ''
+
+  const compact = firstLine.replace(/\s+/g, ' ').trim()
+  if (!compact) return ''
+
+  if (compact.length <= MAX_SUGGESTION_CHARS) return compact
+  const clipped = compact.slice(0, MAX_SUGGESTION_CHARS)
+  const lastSpace = clipped.lastIndexOf(' ')
+  return (lastSpace > 24 ? clipped.slice(0, lastSpace) : clipped).trimEnd()
+}
+
+function trimRightOverlap(suggestion, rightContext) {
+  const text = suggestion || ''
+  const right = (rightContext || '').trimStart()
+  if (!text || !right) return text
+  if (normalizeText(right).startsWith(normalizeText(text))) return ''
+  return text
+}
+
+function clearSuggestion() {
+  aiSuggestion = ''
+  editorGhost.innerHTML = ''
+}
+
+function getCaretCoordinates(textarea, position) {
+  const div = document.createElement('div')
+  const computed = window.getComputedStyle(textarea)
+
+  div.style.whiteSpace = 'pre-wrap'
+  div.style.wordWrap = 'break-word'
+  div.style.position = 'absolute'
+  div.style.visibility = 'hidden'
+  div.style.pointerEvents = 'none'
+  div.style.top = '0'
+  div.style.left = '0'
+
+  div.style.fontFamily = computed.fontFamily
+  div.style.fontSize = computed.fontSize
+  div.style.fontWeight = computed.fontWeight
+  div.style.lineHeight = computed.lineHeight
+  div.style.padding = computed.padding
+  div.style.border = computed.border
+  div.style.boxSizing = computed.boxSizing
+  div.style.width = `${textarea.clientWidth}px`
+
+  div.textContent = textarea.value.slice(0, Math.max(0, position))
+
+  const marker = document.createElement('span')
+  marker.textContent = '\u200b'
+  div.appendChild(marker)
+
+  document.body.appendChild(div)
+  const coords = { left: marker.offsetLeft, top: marker.offsetTop }
+  document.body.removeChild(div)
+
+  return coords
+}
+
+function renderSuggestionOverlay() {
+  editorGhost.innerHTML = ''
+
+  if (!aiSuggestion) return
+  if (document.activeElement !== editor) return
+
+  const start = editor.selectionStart || 0
+  const end = editor.selectionEnd || start
+  if (start !== end) return
+
+  const immediateRight = editor.value[start] || ''
+  if (immediateRight && immediateRight !== '\n') return
+
+  const coords = getCaretCoordinates(editor, end)
+  const textEl = document.createElement('span')
+  textEl.className = 'editor-ghost-text'
+  textEl.textContent = aiSuggestion
+  textEl.style.left = `${coords.left - editor.scrollLeft}px`
+  textEl.style.top = `${coords.top - editor.scrollTop}px`
+  textEl.style.maxWidth = `${Math.max(0, editor.clientWidth - coords.left - 12)}px`
+  editorGhost.appendChild(textEl)
+}
+
+async function fetchOllamaSuggestion(before, after) {
+  const endpoint = getNormalizedEndpoint(aiConfig.endpoint)
+  const model = (aiConfig.model || '').trim()
+
+  if (!endpoint || !model) return ''
+
+  const prompt = `You are an AI writing assistant for Markdown.
+Output only short text to insert at cursor.
+Rules:
+- Single line only.
+- Keep same tone/style.
+- Do not repeat left or right context.
+
+Left context:\n${before}\n\nRight context:\n${after}\n\nInsertion:`
+
+  const response = await fetch(`${endpoint}/api/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model,
+      prompt,
+      stream: false,
+      options: {
+        temperature: 0.45,
+        num_predict: 64
+      }
+    })
+  })
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`)
+  }
+
+  const data = await response.json()
+  return data?.response || ''
+}
+
+async function generateSuggestion() {
+  const requestId = ++activeSuggestionRequestId
+  const start = editor.selectionStart || 0
+  const end = editor.selectionEnd || start
+
+  if (start !== end) {
+    clearSuggestion()
+    return
+  }
+
+  const rightChar = editor.value[start] || ''
+  if (rightChar && rightChar !== '\n') {
+    clearSuggestion()
+    return
+  }
+
+  const before = editor.value.slice(Math.max(0, start - 1500), start)
+  const after = editor.value.slice(start, Math.min(editor.value.length, start + 600))
+
+  let rawSuggestion = ''
+  if (aiConfig.enabled) {
+    try {
+      rawSuggestion = await fetchOllamaSuggestion(before, after)
+    } catch {
+      rawSuggestion = getMockSuggestion(before, after)
+    }
+  } else {
+    rawSuggestion = getMockSuggestion(before, after)
+  }
+
+  if (activeSuggestionRequestId !== requestId) return
+
+  const cleaned = sanitizeSuggestion(trimRightOverlap(rawSuggestion, after))
+  if (!cleaned) {
+    clearSuggestion()
+    return
+  }
+
+  const normalizedBefore = normalizeText(before)
+  const normalizedAfter = normalizeText(after)
+  const normalizedSuggestion = normalizeText(cleaned)
+  if (
+    !normalizedSuggestion ||
+    normalizedBefore.endsWith(normalizedSuggestion) ||
+    normalizedAfter.startsWith(normalizedSuggestion)
+  ) {
+    clearSuggestion()
+    return
+  }
+
+  aiSuggestion = cleaned
+  renderSuggestionOverlay()
+}
+
+function scheduleSuggestion() {
+  clearTimeout(suggestionTimeout)
+  clearSuggestion()
+  suggestionTimeout = setTimeout(() => {
+    generateSuggestion()
+  }, SUGGESTION_DEBOUNCE_MS)
+}
+
+function acceptSuggestion() {
+  if (!aiSuggestion) return false
+  const start = editor.selectionStart || 0
+  const end = editor.selectionEnd || start
+  const nextValue = editor.value.slice(0, start) + aiSuggestion + editor.value.slice(end)
+  editor.value = nextValue
+  const nextPos = start + aiSuggestion.length
+  editor.selectionStart = nextPos
+  editor.selectionEnd = nextPos
+
+  clearSuggestion()
+  updatePreview()
+  updateStats()
+  autoSave()
+  scheduleSuggestion()
+  return true
+}
+
+function getNormalizedEndpoint(url) {
+  return (url || '').trim().replace(/\/+$/, '')
+}
+
+function setAIMessage(message, type) {
+  aiConnectionMessage.textContent = message
+  aiConnectionMessage.classList.remove('success', 'error')
+  if (type) {
+    aiConnectionMessage.classList.add(type)
+  }
+}
+
+function updateAIBadge() {
+  if (!aiConfig.enabled) {
+    aiStatusBadge.textContent = 'AI: Mock'
+    aiStatusBadge.classList.remove('connected')
+    return
+  }
+
+  aiStatusBadge.textContent = `AI: ${aiConfig.model}`
+  aiStatusBadge.classList.add('connected')
+}
+
+function loadAIConfig() {
+  const saved = localStorage.getItem('markscribe-demo-ai-config')
+  if (!saved) {
+    updateAIBadge()
+    return
+  }
+
+  try {
+    const parsed = JSON.parse(saved)
+    aiConfig = {
+      enabled: Boolean(parsed.enabled),
+      endpoint: getNormalizedEndpoint(parsed.endpoint) || 'http://127.0.0.1:11434',
+      model: (parsed.model || 'llama3.2:latest').trim()
+    }
+  } catch {
+    // ignore malformed local storage
+  }
+
+  ollamaEndpointInput.value = aiConfig.endpoint
+  ollamaModelInput.value = aiConfig.model
+  updateAIBadge()
+}
+
+function saveAIConfig(enabled) {
+  aiConfig = {
+    enabled,
+    endpoint: getNormalizedEndpoint(ollamaEndpointInput.value) || 'http://127.0.0.1:11434',
+    model: (ollamaModelInput.value || 'llama3.2:latest').trim()
+  }
+
+  ollamaEndpointInput.value = aiConfig.endpoint
+  ollamaModelInput.value = aiConfig.model
+  localStorage.setItem('markscribe-demo-ai-config', JSON.stringify(aiConfig))
+  updateAIBadge()
+}
+
+async function testOllamaConnection() {
+  const endpoint = getNormalizedEndpoint(ollamaEndpointInput.value)
+  if (!endpoint) {
+    setAIMessage('Please enter a valid endpoint URL.', 'error')
+    return false
+  }
+
+  testAIConnectionBtn.disabled = true
+  testAIConnectionBtn.textContent = 'Testing...'
+
+  try {
+    const response = await fetch(`${endpoint}/api/tags`, {
+      method: 'GET'
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+
+    const data = await response.json()
+    const models = Array.isArray(data.models) ? data.models : []
+    const currentModel = (ollamaModelInput.value || '').trim()
+    const hasModel = currentModel
+      ? models.some((item) => item?.name === currentModel)
+      : false
+
+    if (currentModel && !hasModel) {
+      setAIMessage(
+        `Connected to Ollama, but model "${currentModel}" was not found. Save anyway to use it later.`,
+        'error'
+      )
+      return false
+    }
+
+    setAIMessage('Connected successfully. You can now save this endpoint.', 'success')
+    return true
+  } catch (error) {
+    setAIMessage(
+      `Connection failed (${error instanceof Error ? error.message : 'unknown error'}). If Ollama is running, this may be a browser CORS restriction.`,
+      'error'
+    )
+    return false
+  } finally {
+    testAIConnectionBtn.disabled = false
+    testAIConnectionBtn.textContent = 'Test Connection'
+  }
+}
+
+function openAIModal() {
+  ollamaEndpointInput.value = aiConfig.endpoint
+  ollamaModelInput.value = aiConfig.model
+  setAIMessage(
+    aiConfig.enabled
+      ? 'Using saved Ollama settings for this browser.'
+      : 'Demo currently uses mock AI. Connect Ollama to try live endpoint settings.',
+    undefined
+  )
+  aiModal.classList.add('active')
+}
+
+function closeAIModalFn() {
+  aiModal.classList.remove('active')
+}
 
 // Load saved content from localStorage
 function loadSavedContent() {
@@ -323,16 +683,60 @@ editor.addEventListener('input', () => {
   updatePreview()
   updateStats()
   autoSave()
+  scheduleSuggestion()
+})
+
+editor.addEventListener('keyup', () => {
+  renderSuggestionOverlay()
+  scheduleSuggestion()
+})
+
+editor.addEventListener('click', () => {
+  renderSuggestionOverlay()
+  scheduleSuggestion()
+})
+
+editor.addEventListener('scroll', () => {
+  renderSuggestionOverlay()
+})
+
+editor.addEventListener('blur', () => {
+  clearSuggestion()
+})
+
+editor.addEventListener('focus', () => {
+  renderSuggestionOverlay()
+  scheduleSuggestion()
 })
 
 darkModeToggle.addEventListener('click', toggleDarkMode)
 
 exportBtn.addEventListener('click', openExportModal)
 closeModal.addEventListener('click', closeExportModal)
+aiConnectBtn.addEventListener('click', openAIModal)
+closeAIModal.addEventListener('click', closeAIModalFn)
+
+testAIConnectionBtn.addEventListener('click', async () => {
+  await testOllamaConnection()
+})
+
+saveAISettingsBtn.addEventListener('click', async () => {
+  const ok = await testOllamaConnection()
+  saveAIConfig(ok)
+  if (ok) {
+    setAIMessage('Saved. Demo is now configured for this Ollama endpoint in your browser.', 'success')
+  }
+})
 
 exportModal.addEventListener('click', (e) => {
   if (e.target === exportModal) {
     closeExportModal()
+  }
+})
+
+aiModal.addEventListener('click', (e) => {
+  if (e.target === aiModal) {
+    closeAIModalFn()
   }
 })
 
@@ -348,6 +752,11 @@ viewBtns.forEach((btn) => {
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab' && document.activeElement === editor && aiSuggestion) {
+    e.preventDefault()
+    if (acceptSuggestion()) return
+  }
+
   // Cmd/Ctrl + S to save
   if ((e.metaKey || e.ctrlKey) && e.key === 's') {
     e.preventDefault()
@@ -363,12 +772,16 @@ document.addEventListener('keydown', (e) => {
   // ESC to close modal
   if (e.key === 'Escape') {
     closeExportModal()
+    closeAIModalFn()
+    clearSuggestion()
   }
 })
 
 // Initialize
 loadDarkModePreference()
+loadAIConfig()
 loadSavedContent()
+scheduleSuggestion()
 
 // Auto-save every 30 seconds
 setInterval(saveContent, 30000)
